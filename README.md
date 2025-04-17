@@ -1,5 +1,7 @@
 # Temperature and Humidity Sensor
 
+ A temperature and Humidity sensor for Apple Home Kit with OLED display.
+ 
  **Required Hardware**
  - DHT11
  - OLED SSD1306 128x64 i2c
