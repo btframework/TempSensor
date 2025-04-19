@@ -38,12 +38,19 @@
 #define DHT_LOW_HUMIDITY        15
 #define DHT_HIGH_HUMIDITY       85
 
+// OLED pins.
 #define OLED_SDA_PIN            GPIO_NUM_4
 #define OLED_SCL_PIN            GPIO_NUM_5
 
+// OLED I2C address.
 #define OLED_I2C_ADDRESS        0x3C
+// OLED dimensin.
 #define OLED_SCREEN_WIDTH       128
 #define OLED_SCREEN_HEIGHT      64
+
+// Uncomment the line below if you use DHT22
+// Comment the line below if you use DHT11
+//#define DHT22
 
 /**************************************************************************************/
 
@@ -522,8 +529,17 @@ void UiTask(void *pvParameter)
 /**************************************************************************************/
 /*                                 Sensor reading task                                */
 
-#define MAX_BLOCKS  64
-#define DHT_DELAY   22
+#if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2
+    #define MAX_BLOCKS	64
+#else
+    #define MAX_BLOCKS	48
+#endif
+
+#ifdef DHT22
+    #define DHT_DELAY   2
+#else
+    #define DHT_DELAY   22
+#endif
 
 bool IRAM_ATTR DhtRxDone(rmt_channel_handle_t Channel,
     const rmt_rx_done_event_data_t* EventData, void* UserData)
@@ -613,8 +629,15 @@ void ReadSensorTask(void* pvParameter)
                         uint8_t Total = Data[0] + Data[1] + Data[2] + Data[3];
                         if (Data[4] == Total)
                         {
-                            Humidity = Data[0];
-                            Temperature = Data[2];
+                            #ifdef DHT22
+                                Humidity = (Data[0] * 256 + Data[1]) * 0.1;
+                                Temperature = ((Data[2] & 0x7f) * 256 + Data[3]) * 0.1;
+                                if (Data[2] & 0x80)
+                                    Temperature = -Temperature;
+                            #else
+                                Humidity = Data[0];
+                                Temperature = Data[2];
+                            #endif
                         }
                     }
                 }
