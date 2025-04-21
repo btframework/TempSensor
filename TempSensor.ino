@@ -52,6 +52,12 @@
 // Comment the line below if you use DHT11
 //#define DHT22
 
+#ifndef DHT22
+    // If you use DHT11 you can correct its measurement by adding some offset
+    #define HUMIDITY_OFFSET     14
+    #define TEMPERATURE_OFFSET  (-3)
+#endif
+
 /**************************************************************************************/
 
 
@@ -421,15 +427,19 @@ void DisplayBlinkableIcons(const bool Hide)
         case HS_CONFIG_MODE_EXIT_SELECTED:
             DisplayInitialIcon(HS_CONFIG_MODE_EXIT);
             break;
+
         case HS_CONFIG_MODE_REBOOT_SELECTED:
             DisplayInitialIcon(HS_CONFIG_MODE_REBOOT);
             break;
+
         case HS_CONFIG_MODE_LAUNCH_AP_SELECTED:
             DisplayInitialIcon(HS_CONFIG_MODE_LAUNCH_AP);
             break;
+
         case HS_CONFIG_MODE_UNPAIR_SELECTED:
             DisplayInitialIcon(HS_CONFIG_MODE_UNPAIR);
             break;
+            
         case HS_CONFIG_MODE_ERASE_WIFI_SELECTED:
             DisplayInitialIcon(HS_CONFIG_MODE_ERASE_WIFI);
             break;
@@ -520,6 +530,7 @@ void UiTask(void *pvParameter)
         else
             DisplayHomeSpanStatus(FirstTime);
     }
+
     vTaskDelete(NULL);
 }
 
@@ -635,8 +646,8 @@ void ReadSensorTask(void* pvParameter)
                                 if (Data[2] & 0x80)
                                     Temperature = -Temperature;
                             #else
-                                Humidity = Data[0];
-                                Temperature = Data[2];
+                                Humidity = Data[0] + HUMIDITY_OFFSET;
+                                Temperature = Data[2] + TEMPERATURE_OFFSET;
                             #endif
                         }
                     }
@@ -675,6 +686,7 @@ void HomeSpanStatusUpdate(HS_STATUS Status)
 }
 
 /**************************************************************************************/
+
 
 /**************************************************************************************/
 /*                                  Arduino routines                                  */
@@ -730,12 +742,12 @@ void setup()
 
     // Add temperature sensor device.
     new SpanAccessory();
-    new DeviceIdentify("DroneTales Temperature Sensor", "DHT11");
+    new DeviceIdentify("DroneTales Temperature Sensor", "DHT");
     new TemperatureSensor();
 
     // Add humidity sensor device.
     new SpanAccessory();
-    new DeviceIdentify("DroneTales Humidity Sensor", "DHT11");
+    new DeviceIdentify("DroneTales Humidity Sensor", "DHT");
     new HumiditySensor();
 }
 
