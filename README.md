@@ -1,6 +1,8 @@
 # Temperature and Humidity Sensor
 
  A temperature and Humidity sensor for Apple Home Kit with OLED display.
+
+ This repository contains firmware for the HomeKit device described in [this video](https://youtu.be/CxgiTkTlNZg).
  
  **Required Hardware**
  - DHT11
